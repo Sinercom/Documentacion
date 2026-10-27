@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carátula de Seguimiento - SINERCOM</title>
+    <link rel="icon" type="image/jpeg" href="https://i.ibb.co/0R5mkscP/logo-Sinercom-recorte.jpg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --sinercorp-pink: #DD2FB5; --sinercorp-purple: #7A29E6; --sinercorp-blue: #2632F0; --sinercorp-dark: #021241; --bg-light: #f4f7f6; --border-color: #ccc; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { margin: 0; padding: 0; background-color: var(--bg-light); display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        
+        #login-section { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(2, 18, 65, 0.2); width: 100%; max-width: 400px; text-align: center; border-top: 5px solid var(--sinercorp-purple); }
+        #login-section img { max-width: 220px; margin-bottom: 20px; }
+        #login-section h2 { color: var(--sinercorp-dark); margin-bottom: 20px; font-size: 1.2rem; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; color: var(--sinercorp-dark); font-weight: bold; font-size: 0.9rem; }
+        .input-group input, .input-group select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; }
+        .btn-login { background: linear-gradient(90deg, var(--sinercorp-pink), var(--sinercorp-purple), var(--sinercorp-blue)); color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-login:hover { opacity: 0.9; transform: scale(1.02); }
+        #login-error { color: red; font-size: 0.9rem; margin-top: 10px; display: none; }
+        #debug-info { margin-top: 15px; padding: 10px; background: #f0f0f0; border-radius: 5px; font-size: 0.75rem; color: #666; text-align: left; display: none; font-family: monospace; }
+        #debug-info.visible { display: block; }
+
+        #dashboard-section { display: none; width: 100%; max-width: 1400px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(2, 18, 65, 0.2); overflow: hidden; margin: 20px; }
+        .header { background-color: var(--sinercorp-dark); color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--sinercorp-pink); }
+        .header-logo img { height: 45px; vertical-align: middle; border-radius: 4px; }
+        .user-info { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 20px; }
+        .user-info i { font-size: 1.2rem; color: var(--sinercorp-pink); }
+        .btn-logout { background: var(--sinercorp-pink); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-left: 15px; font-size: 0.8rem; }
+
+        .tabs { display: flex; background: #e9ecef; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; }
+        .tab-btn { padding: 15px 25px; border: none; background: none; cursor: pointer; font-size: 1rem; font-weight: bold; color: #666; transition: 0.3s; }
+        .tab-btn:hover { background: #dee2e6; }
+        .tab-btn.active { background: white; color: var(--sinercorp-dark); border-bottom: 3px solid var(--sinercorp-purple); }
+        .tab-content { display: none; padding: 30px; }
+        .tab-content.active { display: block; }
+
+        .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .full-width { grid-column: span 2; }
+        .form-group label { display: block; margin-bottom: 8px; color: var(--sinercorp-dark); font-weight: 600; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; background-color: #f9f9f9; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--sinercorp-purple); box-shadow: 0 0 5px rgba(122, 41, 230, 0.3); }
+
+        .fecha-auto { background-color: #e3f2fd !important; border-color: var(--sinercorp-blue) !important; font-weight: bold; color: var(--sinercorp-dark); cursor: not-allowed; }
+        .fecha-inicio-group { display: none; }
+        .fecha-inicio-group.visible { display: block; }
+
+        .docs-requeridos { display: none; margin-top: 10px; padding: 10px 15px; background-color: #fff8e1; border-left: 4px solid #ffc107; border-radius: 4px; font-size: 0.85rem; color: #856404; }
+        .docs-requeridos.visible { display: block; }
+        .docs-requeridos strong { display: block; margin-bottom: 5px; color: #533f03; }
+        .docs-requeridos ul { margin: 0; padding-left: 20px; }
+
+        .file-upload { border: 2px dashed var(--sinercorp-purple); padding: 20px; text-align: center; border-radius: 8px; background: #faf5ff; cursor: pointer; transition: 0.3s; }
+        .file-upload:hover { background: #f0e6ff; }
+        .file-upload input[type="file"] { display: none; }
+        .file-upload label { cursor: pointer; color: var(--sinercorp-purple); font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .file-upload i { font-size: 2rem; }
+
+        .btn-submit { background: linear-gradient(90deg, var(--sinercorp-pink), var(--sinercorp-blue)); color: white; border: none; padding: 15px; width: 100%; border-radius: 6px; font-size: 1.1rem; cursor: pointer; font-weight: bold; margin-top: 20px; transition: 0.3s; position: relative; }
+        .btn-submit:hover { opacity: 0.9; transform: translateY(-2px); }
+        .btn-submit:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+        .spinner { display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 10px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .success-message { display: none; background: linear-gradient(135deg, #d4edda, #c3e6cb); color: #155724; padding: 20px; border-radius: 8px; margin-top: 20px; border-left: 5px solid #28a745; animation: fadeIn 0.5s ease; }
+        .success-message i { font-size: 2rem; color: #28a745; margin-right: 10px; }
+        .success-message h3 { margin: 0 0 5px 0; color: #155724; }
+        .success-message p { margin: 5px 0; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .contador-cargas { background: linear-gradient(135deg, var(--sinercorp-purple), var(--sinercorp-blue)); color: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 10px rgba(122, 41, 230, 0.3); }
+        .contador-cargas i { font-size: 2rem; }
+        .contador-cargas .numero { font-size: 2rem; font-weight: bold; }
+        .contador-cargas .texto { font-size: 0.9rem; opacity: 0.9; }
+
+        .filtros-container { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; border-left: 4px solid var(--sinercorp-purple); }
+        .filtros-container .form-group { margin-bottom: 0; flex: 1; min-width: 140px; }
+        .filtros-container .form-group label { font-size: 0.8rem; margin-bottom: 4px; }
+        .filtros-container .form-group input, .filtros-container .form-group select { padding: 8px 10px; font-size: 0.9rem; }
+        .btn-filtrar { background: var(--sinercorp-dark); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; height: 38px; }
+        .btn-exportar-txt { background: linear-gradient(90deg, #28a745, #20c997); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; height: 38px; }
+        .btn-exportar-excel { background: #1d6f42; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; height: 38px; }
+
+        .imagen-auditor-container { display: none; margin-bottom: 15px; text-align: right; padding: 8px 12px; background: linear-gradient(135deg, #f0f4ff, #ffffff); border: 2px solid var(--sinercorp-purple); border-radius: 10px; box-shadow: 0 4px 12px rgba(122, 41, 230, 0.15); }
+        .imagen-auditor-container.visible { display: block; }
+        .imagen-auditor-container img { max-width: 220px; max-height: 90px; border-radius: 6px; border: 2px solid var(--sinercorp-blue); box-shadow: 0 2px 6px rgba(0,0,0,0.1); transition: transform 0.3s; }
+        .imagen-auditor-container img:hover { transform: scale(1.05); }
+        .imagen-auditor-container .titulo-imagen { display: inline-block; color: var(--sinercorp-dark); font-weight: bold; font-size: 0.75rem; margin-right: 10px; text-transform: uppercase; letter-spacing: 1px; vertical-align: middle; }
+
+        .resumen-container { background: linear-gradient(135deg, #f0f4ff, #ffffff); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #d0d7ff; display: none; }
+        .resumen-container h3 { margin-top: 0; color: var(--sinercorp-dark); font-size: 1.1rem; border-bottom: 2px solid var(--sinercorp-blue); padding-bottom: 5px; }
+        .resumen-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin-top: 15px; }
+        .resumen-item { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 5px solid var(--sinercorp-pink); transition: transform 0.2s; }
+        .resumen-item:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .resumen-item .doc { display: block; color: var(--sinercorp-dark); font-size: 1.05rem; font-weight: bold; margin-bottom: 5px; }
+        .resumen-item .cliente { display: block; color: #666; font-size: 0.85rem; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed #ddd; }
+        .resumen-item .litros { color: var(--sinercorp-purple); font-size: 1.4rem; font-weight: bold; }
+        .resumen-item .combustible { display: inline-block; font-size: 0.75rem; padding: 3px 8px; border-radius: 10px; background: #e9ecef; color: #495057; margin-top: 8px; font-weight: bold; margin-right: 4px; }
+        .resumen-item .combustible.diesel { background: #fff3cd; color: #856404; }
+        .resumen-item .combustible.obm { background: #d1ecf1; color: #0c5460; }
+
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.85rem; }
+        th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #ddd; vertical-align: middle; }
+        th { background-color: var(--sinercorp-dark); color: white; font-size: 0.8rem; }
+        tr:hover { background-color: #f1f1f1; }
+        .fecha-cell { font-size: 0.8rem; font-weight: bold; text-align: center; white-space: nowrap; }
+        .fecha-inicio-cell { background-color: #e3f2fd; color: #0d47a1; }
+        .fecha-facturado-cell { background-color: #e8f5e9; color: #1b5e20; }
+        .fecha-facturado-cell.vacia { background-color: #f5f5f5; color: #999; font-style: italic; }
+        
+        .combustible-cell { font-size: 0.75rem; font-weight: bold; text-align: center; white-space: nowrap; padding: 5px 8px; border-radius: 4px; }
+        .combustible-diesel { background-color: #fff3cd; color: #856404; }
+        .combustible-obm { background-color: #d1ecf1; color: #0c5460; }
+        
+        .select-estado-tabla { padding: 8px 10px; border-radius: 6px; border: 2px solid transparent; font-size: 0.85rem; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23000000%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 10px; padding-right: 30px; }
+        .estado-pendiente-cert { background-color: #ffc107 !important; color: #000 !important; border-color: #e0a800 !important; }
+        .estado-certificado { background-color: #17a2b8 !important; color: #fff !important; border-color: #117a8b !important; }
+        .estado-pendiente-portal { background-color: #7A29E6 !important; color: #fff !important; border-color: #5a1cac !important; }
+        .estado-pendiente-fact { background-color: #fd7e14 !important; color: #fff !important; border-color: #dc6502 !important; }
+        .estado-facturado { background-color: #28a745 !important; color: #fff !important; border-color: #1e7e34 !important; }
+        .select-estado-tabla option { background-color: white; color: #333; padding: 8px; }
+        .estado-container { display: flex; gap: 5px; align-items: center; }
+
+        .btn-guardar-estado { background-color: #6c757d; color: white; border: none; padding: 8px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; transition: 0.3s; white-space: nowrap; }
+        .btn-guardar-estado:hover { background-color: var(--sinercorp-pink); transform: scale(1.05); }
+        .btn-guardar-estado.pendiente { background-color: var(--sinercorp-pink); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(221, 47, 181, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(221, 47, 181, 0); } 100% { box-shadow: 0 0 0 0 rgba(221, 47, 181, 0); } }
+
+        .btn-action { border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; color: white; margin-right: 5px; }
+        .btn-preview { background-color: var(--sinercorp-blue); }
+        .btn-download { background-color: #28a745; }
+        .btn-edit { background-color: #ffc107; color: #000; }
+        .btn-delete { background-color: #dc3545; }
+        .btn-restore { background-color: var(--sinercorp-purple); padding: 10px 20px; font-size: 0.9rem; }
+        .btn-action:hover { opacity: 0.8; }
+
+        .cliente-form-container { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--sinercorp-purple); }
+        .cliente-form-container h3 { margin-top: 0; color: var(--sinercorp-dark); }
+
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 20px; border-radius: 8px; width: 80%; max-width: 800px; height: 80vh; display: flex; flex-direction: column; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--sinercorp-purple); padding-bottom: 10px; margin-bottom: 10px; }
+        .modal-header h3 { margin: 0; color: var(--sinercorp-dark); }
+        .close-modal { font-size: 1.5rem; cursor: pointer; color: red; font-weight: bold; }
+        .modal-body { flex-grow: 1; background: #eee; display: flex; justify-content: center; align-items: center; overflow: hidden; border: 1px solid #ccc; }
+        .modal-body img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+        .toast { position: fixed; bottom: 30px; right: 30px; background: var(--sinercorp-dark); color: white; padding: 15px 25px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: none; align-items: center; gap: 10px; z-index: 2000; border-left: 5px solid #28a745; animation: slideIn 0.3s ease; max-width: 400px; }
+        .toast i { color: #28a745; font-size: 1.5rem; flex-shrink: 0; }
+        .toast.error { border-left-color: #dc3545; }
+        .toast.error i { color: #dc3545; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        @media (max-width: 600px) { .grid-form { grid-template-columns: 1fr; } .full-width { grid-column: span 1; } .header { flex-direction: column; gap: 10px; } .tabs { flex-direction: column; } .imagen-auditor-container { text-align: center; } }
+    </style>
+</head>
+<body>
+
+    <!-- ================= LOGIN ================= -->
+    <div id="login-section">
+        <img src="https://i.ibb.co/0R5mkscP/logo-Sinercom-recorte.jpg" alt="SINERCOM Logo">
+        <h2>Acceso al Sistema de Carátulas</h2>
+        
+        <div class="input-group">
+            <label>Usuario:</label>
+            <select id="user-select">
+                <option value="">-- Seleccione un perfil --</option>
+                <option value="admin">AUDITOR 🔍</option>
+                <option value="logis">LOGISTICA 🚚</option>
+                <option value="admin2">ADMINISTRACION 🗃️</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Clave de Acceso:</label>
+            <input type="password" id="password-input" placeholder="Ingrese su clave" autocomplete="off">
+        </div>
+
+        <button class="btn-login" onclick="validateLogin()">Ingresar</button>
+        <div id="login-error">Clave incorrecta. Intente nuevamente.</div>
+
+        <div id="debug-info">
+            <strong>🔍 Modo Debug:</strong><br>
+            Usuario: <span id="debug-user">-</span><br>
+            Clave ingresada: <span id="debug-pass">-</span><br>
+            Clave esperada: <span id="debug-expected">-</span><br>
+            Resultado: <span id="debug-result">-</span>
+        </div>
+    </div>
+
+    <!-- ================= DASHBOARD ================= -->
+    <div id="dashboard-section">
+        <div class="header">
+            <div class="header-logo">
+                <img src="https://i.ibb.co/0R5mkscP/logo-Sinercom-recorte.jpg" alt="SINERCOM">
+            </div>
+            <div style="display: flex; align-items: center;">
+                <div class="user-info">
+                    <i id="user-icon">👤</i>
+                    <span id="user-name">Usuario</span>
+                </div>
+                <button class="btn-logout" onclick="logout()">Salir</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" id="tab-carga-btn" onclick="openTab('tab-carga')">📝 Cargar Carátula</button>
+            <button class="tab-btn" id="tab-ver-archivos-btn" onclick="openTab('tab-archivos')">📁 Ver Archivos Cargados</button>
+            <button class="tab-btn" id="tab-clientes-btn" onclick="openTab('tab-clientes')">📇 Base de Datos Clientes</button>
+        </div>
+
+        <!-- Pestaña 1: Formulario -->
+        <div id="tab-carga" class="tab-content active">
+            <h2 style="color: var(--sinercorp-dark); margin-top: 0;">Nueva Carátula</h2>
+
+            <div class="contador-cargas" id="contador-cargas" style="display: none;">
+                <i class="fas fa-check-circle"></i>
+                <div>
+                    <div class="numero" id="contador-numero">0</div>
+                    <div class="texto">Carátulas cargadas en esta sesión</div>
+                </div>
+            </div>
+
+            <form id="upload-form">
+                <div class="grid-form">
+                    <div class="form-group">
+                        <label>Fecha:</label>
+                        <input type="date" id="fecha" required>
+                    </div>
+                    <div class="form-group fecha-inicio-group" id="fecha-inicio-group">
+                        <label>Fecha de Inicio (automática):</label>
+                        <input type="date" id="fecha-inicio" class="fecha-auto" readonly title="Se registra automáticamente al guardar">
+                    </div>
+                    <div class="form-group">
+                        <label>Nro_doc:</label>
+                        <input type="text" id="nro_doc" placeholder="Ej: 00123" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Cliente:</label>
+                        <select id="cliente-select" required>
+                            <option value="">-- Seleccione un cliente --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Punto_entrega:</label>
+                        <input type="text" id="punto_entrega" placeholder="Dirección o punto" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Litros:</label>
+                        <input type="number" id="litros" placeholder="Ej: 1500" step="0.01" min="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tipo de Combustible:</label>
+                        <select id="tipo-combustible" required>
+                            <option value="">-- Seleccione el combustible --</option>
+                            <option value="DIESEL X10">DIESEL X10</option>
+                            <option value="OBM">OBM</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Estado:</label>
+                        <select id="estado" required>
+                        </select>
+                        <div class="docs-requeridos" id="docs-requeridos">
+                            <strong>📎 Documentos necesarios para facturar:</strong>
+                            <ul id="lista-docs"></ul>
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Adjuntar Archivo (Carátula):</label>
+                        <div class="file-upload" onclick="document.getElementById('file-input').click()">
+                            <input type="file" id="file-input" accept="image/*, .pdf, .doc, .docx">
+                            <label for="file-input">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span id="file-name">Haga clic aquí para seleccionar un archivo</span>
+                            </label>
+                        </div>
+                        <small style="color: #666; font-size: 0.8rem; display: block; margin-top: 5px;">
+                            <i class="fas fa-info-circle"></i> Tamaño máximo recomendado: 5 MB
+                        </small>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit" id="btn-submit-carga">
+                    <span class="spinner" id="spinner"></span>
+                    <span id="btn-submit-text">Guardar y Enviar Carátula</span>
+                </button>
+            </form>
+
+            <div class="success-message" id="success-message">
+                <i class="fas fa-check-circle"></i>
+                <h3>¡Carátula cargada exitosamente!</h3>
+                <p id="success-details"></p>
+                <p style="font-size: 0.9rem; color: #666;">El formulario está listo para una nueva carga.</p>
+            </div>
+        </div>
+
+        <!-- Pestaña 2: Tabla -->
+        <div id="tab-archivos" class="tab-content">
+            <h2 style="color: var(--sinercorp-dark); margin-top: 0;">Registros Cargados</h2>
+
+            <div class="imagen-auditor-container" id="imagen-auditor">
+                <span class="titulo-imagen">Panel de Auditoría</span>
+                <img src="https://i.ibb.co/NgDrwjt2/Gemini-Generated-Image-yav27eyav27eyav2.jpg" alt="Panel de Auditoría">
+            </div>
+
+            <div class="filtros-container">
+                <div class="form-group">
+                    <label>Desde:</label>
+                    <input type="date" id="filtro-desde">
+                </div>
+                <div class="form-group">
+                    <label>Hasta:</label>
+                    <input type="date" id="filtro-hasta">
+                </div>
+                <div class="form-group" id="filtro-doc-group" style="display: none;">
+                    <label>DOC:</label>
+                    <input type="text" id="filtro-doc" placeholder="Buscar Nro_doc...">
+                </div>
+                <div class="form-group" id="filtro-cliente-group" style="display: none;">
+                    <label>Cliente:</label>
+                    <select id="filtro-cliente">
+                        <option value="">-- Todos los clientes --</option>
+                    </select>
+                </div>
+                <div class="form-group" id="filtro-producto-group" style="display: none;">
+                    <label>Producto:</label>
+                    <select id="filtro-producto">
+                        <option value="">-- Todos los productos --</option>
+                        <option value="DIESEL X10">DIESEL X10</option>
+                        <option value="OBM">OBM</option>
+                    </select>
+                </div>
+                
+                <button class="btn-filtrar" onclick="aplicarFiltro()"><i class="fas fa-filter"></i> Filtrar</button>
+                <button class="btn-filtrar" onclick="limpiarFiltro()" style="background: #6c757d;"><i class="fas fa-times"></i> Limpiar</button>
+                
+                <button class="btn-exportar-excel" id="btn-exportar-excel" onclick="exportarExcel()" style="display:none;"><i class="fas fa-file-excel"></i> Exportar Excel</button>
+                <button class="btn-exportar-txt" id="btn-exportar-txt" onclick="exportarTXT()" style="display:none;"><i class="fas fa-file-download"></i> Exportar TXT</button>
+            </div>
+
+            <div class="resumen-container" id="panel-resumen">
+                <h3>📊 Resumen de Litros por Nro_doc (Período Seleccionado)</h3>
+                <div class="resumen-grid" id="resumen-grid">
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="tabla-archivos">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Facturado</th>
+                            <th>Nro_doc</th>
+                            <th>Cliente</th>
+                            <th>Punto_entrega</th>
+                            <th>Litros</th>
+                            <th>Combustible</th>
+                            <th>Cargado por</th>
+                            <th>Archivo</th>
+                            <th>Acciones</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-archivos">
+                    </tbody>
+                </table>
+                <p id="no-data-msg" style="text-align: center; color: #666; margin-top: 20px;">Cargando datos desde la nube...</p>
+            </div>
+        </div>
+
+        <!-- Pestaña 3: Base de Datos de Clientes -->
+        <div id="tab-clientes" class="tab-content">
+            <h2 style="color: var(--sinercorp-dark); margin-top: 0;">📇 Base de Datos de Clientes</h2>
+
+            <div class="cliente-form-container">
+                <h3 id="cliente-form-title">➕ Agregar Nuevo Cliente</h3>
+                <form id="cliente-form">
+                    <input type="hidden" id="cliente-edit-id">
+                    <div class="grid-form">
+                        <div class="form-group">
+                            <label>Cliente:</label>
+                            <input type="text" id="cliente-nombre" placeholder="Ej: Tecpetrol" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Locación:</label>
+                            <input type="text" id="cliente-locacion" placeholder="Ej: Los Bastos">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Observaciones:</label>
+                            <input type="text" id="cliente-observaciones" placeholder="Ej: Locación variable">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="submit" class="btn-submit" style="margin-top: 0; flex: 1;">
+                            <i class="fas fa-save"></i> <span id="btn-cliente-text">Guardar Cliente</span>
+                        </button>
+                        <button type="button" class="btn-submit" onclick="cancelarEdicionCliente()" 
+                                style="margin-top: 0; flex: 0.3; background: #6c757d; display: none;" id="btn-cancelar-cliente">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center;">
+                <button class="btn-action btn-restore" onclick="restaurarClientesDefault()" title="Restaurar los clientes originales">
+                    <i class="fas fa-sync-alt"></i> Restaurar Clientes por Defecto
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table id="tabla-clientes">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Locación</th>
+                            <th>Observaciones</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-clientes">
+                    </tbody>
+                </table>
+                <p id="no-data-clientes-msg" style="text-align: center; color: #666; margin-top: 20px;">No hay clientes cargados aún.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= MODAL ================= -->
+    <div id="modal-preview" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Vista Previa del Archivo</h3>
+                <span class="close-modal" onclick="cerrarModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="modal-body">
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= TOAST ================= -->
+    <div class="toast" id="toast-guardado">
+        <i class="fas fa-check-circle"></i>
+        <span id="toast-message">Guardado correctamente</span>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURACIÓN DE JSONBIN.IO CON TUS DATOS
+        // ============================================
+        const JSONBIN_API_KEY = "$2a$10$vvUDCIKDjP7xcEcfjZOhX.S5E.sznwoREzHd57ZloODk4SMWxx17u";
+        const JSONBIN_BIN_ID = "6ae08a00ac6210605a55dbe0";
+        const JSONBIN_BASE_URL = "https://api.jsonbin.io/v3/b";
+
+        const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+        let DB = { registros: [], clientes: [] };
+        let currentUserRole = "";
+        let currentUserName = "";
+        let contadorCargas = 0;
+        let cambiosPendientes = {};
+        let filtroActivo = { desde: null, hasta: null, doc: null, cliente: null, producto: null };
+
+        async function cargarDatosDesdeNube() {
+            try {
+                const respuesta = await fetch(`${JSONBIN_BASE_URL}/${JSONBIN_BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': JSONBIN_API_KEY }
+                });
+                if (!respuesta.ok) throw new Error('Error de red');
+                const json = await respuesta.json();
+                DB = json.record || { registros: [], clientes: [] };
+                
+                if (!DB.clientes || DB.clientes.length === 0) {
+                    DB.clientes = CLIENTES_INICIALES.map((c, i) => ({
+                        id: Date.now() + i,
+                        nombre: c.nombre,
+                        locacion: c.locacion || "",
+                        observaciones: c.observaciones || ""
+                    }));
+                    await sincronizarNube();
+                }
+            } catch (error) {
+                console.error("Error cargando datos:", error);
+                mostrarToast("⚠️ Error al conectar con la nube. Verifica tu internet.", true);
+                const backup = localStorage.getItem('backup_jsonbin');
+                if (backup) DB = JSON.parse(backup);
+            }
+        }
+
+        async function sincronizarNube() {
+            try {
+                localStorage.setItem('backup_jsonbin', JSON.stringify(DB));
+
+                const respuesta = await fetch(`${JSONBIN_BASE_URL}/${JSONBIN_BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_API_KEY
+                    },
+                    body: JSON.stringify(DB)
+                });
+                
+                if (!respuesta.ok) {
+                    const errorInfo = await respuesta.json();
+                    throw new Error(errorInfo.message || 'Error al guardar en la nube');
+                }
+            } catch (error) {
+                console.error("Error sincronizando:", error);
+                mostrarToast(`❌ Error al guardar en la nube: ${error.message}. Los datos están seguros localmente.`, true);
+            }
+        }
+
+        function getFechaHoy() {
+            const hoy = new Date();
+            return `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+        }
+
+        function formatearFecha(fechaISO) {
+            if (!fechaISO) return '';
+            const [año, mes, dia] = fechaISO.split('-');
+            return `${dia}/${mes}/${año}`;
+        }
+
+        const CREDENCIALES = {
+            "admin": { password: "germancito2026", userName: "AUDITOR 🔍", userIcon: "🔍", role: "auditor" },
+            "logis": { password: "alf", userName: "LOGISTICA 🚚", userIcon: "🚚", role: "logistica" },
+            "admin2": { password: "admin2026", userName: "ADMINISTRACION 🗃️", userIcon: "🗃️", role: "administracion" }
+        };
+
+        const WORKFLOW_CONFIG = {
+            "Hidrofrag": { estados: ["Pendiente PEN", "Pendiente de facturación", "Facturado"], docs: ["REMITO", "PEN"] },
+            "Tecpetrol": { estados: ["Pendiente de certificación", "Pendiente de aprobación en portal", "Pendiente de facturación", "Facturado"], docs: ["REMITO", "CERTIFICACIÓN"] },
+            "Poliar": { estados: ["Pendiente de Certificación", "Pendiente de Facturación", "Facturado"], docs: ["REMITO", "ORDEN DE COMPRA", "NOTA ITC REDUCIDO DE CORRESPONDER"] },
+            "Prod Eng": { estados: ["Pendiente de facturación", "Facturado -pendiente OC-OR", "facturado - Rendido"], docs: ["ORDEN DE COMPRA", "REMITO"] },
+            "PAE": { estados: ["Pendiente de enviar excel con detalle de entregas (Logistica)", "Pendiente de cargar Pedido (Administración)", "Pedido aceptado (Administración)", "Facturado (Administración)"], docs: ["Excel con el detalle de las entregas realizadas", "Remitos certificados"] },
+            "Shell": { estados: ["Pendiente de Certificar( Admin)", "Pendiente de Aprobacion Cert. Admin", "Facturado (admin)"], docs: ["ORDEN DE COMPRA", "REMITO", "Remitos certificados"] },
+            "DEFAULT": { estados: ["Pendiente de Certificación", "Certificado", "Pendiente de Facturación", "Facturado"], docs: ["REMITO", "FACTURA"] }
+        };
+
+        function getWorkflow(clienteNombre) {
+            if (!clienteNombre) return WORKFLOW_CONFIG["DEFAULT"];
+            const nombreUpper = clienteNombre.toUpperCase();
+            if (nombreUpper.includes("HIDROFR")) return WORKFLOW_CONFIG["Hidrofrag"]; 
+            if (nombreUpper.includes("TECPETROL")) return WORKFLOW_CONFIG["Tecpetrol"];
+            if (nombreUpper.includes("POLIAR") || nombreUpper.includes("POLYAR")) return WORKFLOW_CONFIG["Poliar"];
+            if (nombreUpper.includes("PROD ENG") || nombreUpper.includes("PRODENG")) return WORKFLOW_CONFIG["Prod Eng"];
+            if (nombreUpper.includes("PAE")) return WORKFLOW_CONFIG["PAE"];
+            if (nombreUpper.includes("SHELL") || nombreUpper.includes("SHEL") || nombreUpper.includes("SHAEL")) return WORKFLOW_CONFIG["Shell"];
+            return WORKFLOW_CONFIG["DEFAULT"];
+        }
+
+        function getEstadoClass(estado) {
+            if (!estado) return '';
+            const est = estado.toLowerCase();
+            if (est.includes('pendiente') || est.includes('pedido')) {
+                if (est.includes('facturación') || est.includes('facturacion')) return 'estado-pendiente-fact';
+                if (est.includes('certificación') || est.includes('certificacion') || est.includes('certificar')) return 'estado-pendiente-cert';
+                if (est.includes('portal') || est.includes('aprobacion')) return 'estado-pendiente-portal';
+                if (est.includes('pen')) return 'estado-pendiente-portal'; 
+                if (est.includes('excel') || est.includes('cargar')) return 'estado-pendiente-cert'; 
+                return 'estado-pendiente-cert';
+            }
+            if (est.includes('facturado')) return 'estado-facturado';
+            if (est.includes('certificado')) return 'estado-certificado';
+            return '';
+        }
+
+        function getCombustibleClass(combustible) {
+            if (!combustible) return '';
+            if (combustible === 'DIESEL X10') return 'combustible-diesel';
+            if (combustible === 'OBM') return 'combustible-obm';
+            return '';
+        }
+
+        const CLIENTES_INICIALES = [
+            { nombre: "Tecpetrol", locacion: "Los Bastos", observaciones: "" },
+            { nombre: "Tecpetrol", locacion: "Rincón de los Sauces", observaciones: "" },
+            { nombre: "Tecpetrol", locacion: "Fortín de Piedras", observaciones: "" },
+            { nombre: "PAE", locacion: "Contingencias", observaciones: "Locación variable" },
+            { nombre: "PAE", locacion: "CASE - Coirón Amargo Sur Este - 30715433415", observaciones: "Puntos menores" },
+            { nombre: "PAE", locacion: "BCE - Bandurria - 30719480345", observaciones: "Puntos menores" },
+            { nombre: "PAE", locacion: "LA - Lindero Atravesado - 30636798580", observaciones: "Puntos menores" },
+            { nombre: "PAE", locacion: "APO - Aguada Pichana Oeste - 30715954903", observaciones: "Puntos menores" },
+            { nombre: "PAE", locacion: "AC - Aguada Canepa - 30717028054", observaciones: "Puntos menores" },
+            { nombre: "Poliar", locacion: "", observaciones: "" },
+            { nombre: "Hidrofrag", locacion: "", observaciones: "" },
+            { nombre: "Total", locacion: "", observaciones: "" },
+            { nombre: "Geopark", locacion: "", observaciones: "" },
+            { nombre: "Calfrac", locacion: "", observaciones: "" },
+            { nombre: "H&P", locacion: "", observaciones: "" },
+            { nombre: "DLS Archer", locacion: "", observaciones: "" },
+            { nombre: "PAE SL", locacion: "CoiledTubing", observaciones: "Locación variable" },
+            { nombre: "Consorcio de Riego y Drenaje El Chañar", locacion: "", observaciones: "" },
+            { nombre: "Prod Eng", locacion: "", observaciones: "" },
+            { nombre: "Ricciotti Remo", locacion: "", observaciones: "" },
+            { nombre: "Ricciotti Franco", locacion: "", observaciones: "" },
+            { nombre: "Tecniterra Sacia", locacion: "", observaciones: "" },
+            { nombre: "Luis Losi Rovella Carranza SA - UTE", locacion: "", observaciones: "" },
+            { nombre: "Shell", locacion: "CL", observaciones: "" },
+            { nombre: "Shell", locacion: "CA", observaciones: "" },
+            { nombre: "Shell", locacion: "SB", observaciones: "" },
+            { nombre: "Shell", locacion: "BA", observaciones: "" }
+        ];
+
+        async function validateLogin() {
+            const userSelect = document.getElementById('user-select');
+            const passwordInput = document.getElementById('password-input');
+            const errorDiv = document.getElementById('login-error');
+            const debugInfo = document.getElementById('debug-info');
+            
+            const selectedUser = userSelect.value;
+            const password = passwordInput.value;
+
+            document.getElementById('debug-user').innerText = selectedUser || "(no seleccionado)";
+            document.getElementById('debug-pass').innerText = password || "(vacío)";
+            debugInfo.classList.add('visible');
+
+            if (!selectedUser) {
+                document.getElementById('debug-expected').innerText = "-";
+                document.getElementById('debug-result').innerText = "❌ No hay usuario seleccionado";
+                errorDiv.innerText = "❌ Por favor, seleccione un usuario.";
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            const credencial = CREDENCIALES[selectedUser];
+            document.getElementById('debug-expected').innerText = credencial.password;
+
+            if (credencial && password === credencial.password) {
+                document.getElementById('debug-result').innerText = "✅ LOGIN CORRECTO. Descargando datos...";
+                errorDiv.style.display = 'none';
+                
+                await cargarDatosDesdeNube();
+
+                currentUserName = credencial.userName;
+                currentUserRole = credencial.role;
+                contadorCargas = 0;
+                
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('dashboard-section').style.display = 'block';
+                document.getElementById('user-name').innerText = credencial.userName;
+                document.getElementById('user-icon').innerText = credencial.userIcon;
+                
+                cambiosPendientes = {};
+
+                document.getElementById('tab-carga-btn').style.display = 'none';
+                document.getElementById('tab-ver-archivos-btn').style.display = 'none';
+                document.getElementById('tab-clientes-btn').style.display = 'none';
+                document.getElementById('contador-cargas').style.display = 'none';
+                document.getElementById('imagen-auditor').classList.remove('visible');
+                document.getElementById('fecha-inicio-group').classList.remove('visible');
+                document.getElementById('filtro-doc-group').style.display = 'none';
+                document.getElementById('filtro-cliente-group').style.display = 'none';
+                document.getElementById('filtro-producto-group').style.display = 'none';
+                document.getElementById('panel-resumen').style.display = 'none';
+                document.getElementById('btn-exportar-txt').style.display = 'none';
+                document.getElementById('btn-exportar-excel').style.display = 'none';
+
+                if (currentUserRole === "logistica") {
+                    document.getElementById('tab-carga-btn').style.display = 'block';
+                    document.getElementById('contador-cargas').style.display = 'flex';
+                    openTab('tab-carga');
+                    cargarSelectClientes();
+                } else if (currentUserRole === "administracion") {
+                    document.getElementById('tab-carga-btn').style.display = 'block';
+                    document.getElementById('tab-ver-archivos-btn').style.display = 'block';
+                    document.getElementById('tab-clientes-btn').style.display = 'block';
+                    document.getElementById('contador-cargas').style.display = 'flex';
+                    document.getElementById('btn-exportar-excel').style.display = 'block';
+                    openTab('tab-carga');
+                    cargarSelectClientes();
+                    cargarTablaArchivos(currentUserRole);
+                } else { // AUDITOR
+                    document.getElementById('tab-carga-btn').style.display = 'block';
+                    document.getElementById('tab-ver-archivos-btn').style.display = 'block';
+                    document.getElementById('tab-clientes-btn').style.display = 'block';
+                    document.getElementById('contador-cargas').style.display = 'flex';
+                    document.getElementById('imagen-auditor').classList.add('visible');
+                    document.getElementById('fecha-inicio-group').classList.add('visible');
+                    document.getElementById('filtro-doc-group').style.display = 'block';
+                    document.getElementById('filtro-cliente-group').style.display = 'block';
+                    document.getElementById('filtro-producto-group').style.display = 'block';
+                    document.getElementById('panel-resumen').style.display = 'block';
+                    document.getElementById('btn-exportar-excel').style.display = 'block';
+                    document.getElementById('btn-exportar-txt').style.display = 'block';
+                    cargarFiltroClientes();
+                    openTab('tab-carga');
+                    cargarSelectClientes();
+                }
+
+                passwordInput.value = "";
+            } else {
+                document.getElementById('debug-result').innerText = "❌ CLAVE INCORRECTA";
+                errorDiv.innerText = "Clave incorrecta. Intente nuevamente.";
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        document.getElementById('password-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') validateLogin();
+        });
+
+        function logout() {
+            document.getElementById('dashboard-section').style.display = 'none';
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('user-select').value = "";
+            document.getElementById('password-input').value = "";
+            document.getElementById('debug-info').classList.remove('visible');
+            cambiosPendientes = {};
+            currentUserRole = "";
+            contadorCargas = 0;
+            DB = { registros: [], clientes: [] }; 
+        }
+
+        function openTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            
+            if(tabId === 'tab-archivos') {
+                cargarTablaArchivos(currentUserRole);
+                document.getElementById('tab-ver-archivos-btn').classList.add('active');
+            } else if(tabId === 'tab-clientes') {
+                cargarTablaClientes();
+                document.getElementById('tab-clientes-btn').classList.add('active');
+            } else {
+                document.getElementById('tab-carga-btn').classList.add('active');
+                document.getElementById('fecha-inicio').value = getFechaHoy();
+            }
+        }
+
+        document.getElementById('file-input').addEventListener('change', function() {
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                if (file.size > MAX_FILE_SIZE) {
+                    mostrarToast(`❌ El archivo es muy grande. Máximo 5 MB.`, true);
+                    this.value = '';
+                    document.getElementById('file-name').innerText = "Haga clic aquí para seleccionar un archivo";
+                    return;
+                }
+                document.getElementById('file-name').innerText = file.name;
+            } else {
+                document.getElementById('file-name').innerText = "Haga clic aquí para seleccionar un archivo";
+            }
+        });
+
+        document.getElementById('upload-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const form = document.getElementById('upload-form');
+            const btnSubmit = document.getElementById('btn-submit-carga');
+            const spinner = document.getElementById('spinner');
+            const btnText = document.getElementById('btn-submit-text');
+            const fileInput = document.getElementById('file-input');
+
+            const fecha = document.getElementById('fecha').value;
+            const fechaInicio = getFechaHoy();
+            const nro_doc = document.getElementById('nro_doc').value;
+            const clienteSelect = document.getElementById('cliente-select');
+            const cliente = clienteSelect.options[clienteSelect.selectedIndex].text;
+            const punto_entrega = document.getElementById('punto_entrega').value;
+            const litros = parseFloat(document.getElementById('litros').value) || 0;
+            const tipoCombustible = document.getElementById('tipo-combustible').value;
+            const estado = document.getElementById('estado').value;
+
+            if (!fecha || !nro_doc || !punto_entrega || !litros || !cliente || cliente === "-- Seleccione un cliente --" || !tipoCombustible || !estado || fileInput.files.length === 0) {
+                mostrarToast("❌ Complete todos los campos obligatorios.", true);
+                return;
+            }
+
+            btnSubmit.disabled = true;
+            spinner.style.display = 'inline-block';
+            btnText.innerText = 'Guardando en la nube...';
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = async function(event) {
+                try {
+                    const fileData = event.target.result;
+
+                    const nuevoRegistro = {
+                        fecha: fecha, fechaInicio: fechaInicio, fechaFacturado: null,
+                        nro_doc, cliente, punto_entrega, litros, tipoCombustible, estado,
+                        cargado_por: currentUserName, archivo: file.name, fileData: fileData
+                    };
+
+                    DB.registros.push(nuevoRegistro);
+                    await sincronizarNube(); 
+                    
+                    contadorCargas++;
+                    document.getElementById('contador-numero').innerText = contadorCargas;
+                    
+                    let successHTML = 
+                        `<strong>Cliente:</strong> ${cliente}<br>` +
+                        `<strong>Nro_doc:</strong> ${nro_doc}<br>` +
+                        `<strong>Combustible:</strong> ${tipoCombustible}<br>` +
+                        `<strong>Litros:</strong> ${litros.toLocaleString('es-AR')} L`;
+                    
+                    document.getElementById('success-details').innerHTML = successHTML;
+                    document.getElementById('success-message').style.display = 'block';
+                    document.getElementById('success-message').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    
+                    mostrarToast(`✅ Carátula #${contadorCargas} guardada en la nube`);
+                    
+                    form.reset();
+                    document.getElementById('file-name').innerText = "Haga clic aquí para seleccionar un archivo";
+                    document.getElementById('fecha-inicio').value = getFechaHoy();
+                    document.getElementById('docs-requeridos').classList.remove('visible');
+                    
+                    btnSubmit.disabled = false;
+                    spinner.style.display = 'none';
+                    btnText.innerText = 'Guardar y Enviar Carátula';
+                    
+                    setTimeout(() => { document.getElementById('success-message').style.display = 'none'; }, 8000);
+
+                } catch (error) {
+                    console.error("Error al guardar:", error);
+                    btnSubmit.disabled = false;
+                    spinner.style.display = 'none';
+                    btnText.innerText = 'Guardar y Enviar Carátula';
+                    mostrarToast("❌ Error al guardar.", true);
+                }
+            };
+            
+            reader.onerror = function() {
+                btnSubmit.disabled = false;
+                spinner.style.display = 'none';
+                btnText.innerText = 'Guardar y Enviar Carátula';
+                mostrarToast("❌ Error al leer el archivo.", true);
+            };
+            
+            reader.readAsDataURL(file);
+        });
+
+        function aplicarFiltro() {
+            filtroActivo.desde = document.getElementById('filtro-desde').value;
+            filtroActivo.hasta = document.getElementById('filtro-hasta').value;
+            if (currentUserRole === 'auditor') {
+                filtroActivo.doc = document.getElementById('filtro-doc').value.trim();
+                filtroActivo.cliente = document.getElementById('filtro-cliente').value;
+                filtroActivo.producto = document.getElementById('filtro-producto').value;
+            }
+            cargarTablaArchivos(currentUserRole);
+        }
+
+        function limpiarFiltro() {
+            document.getElementById('filtro-desde').value = '';
+            document.getElementById('filtro-hasta').value = '';
+            document.getElementById('filtro-doc').value = '';
+            document.getElementById('filtro-cliente').value = '';
+            document.getElementById('filtro-producto').value = '';
+            filtroActivo = { desde: null, hasta: null, doc: null, cliente: null, producto: null };
+            cargarTablaArchivos(currentUserRole);
+        }
+
+        function cargarFiltroClientes() {
+            const select = document.getElementById('filtro-cliente');
+            if (!select) return;
+            select.innerHTML = '<option value="">-- Todos los clientes --</option>';
+            const clientesUnicos = new Set();
+            DB.registros.forEach(r => { if (r.cliente) clientesUnicos.add(r.cliente); });
+            Array.from(clientesUnicos).sort().forEach(c => {
+                const option = document.createElement('option');
+                option.value = c; option.text = c;
+                select.appendChild(option);
+            });
+        }
+
+        function cargarTablaArchivos(userRole) {
+            let registros = [...DB.registros];
+            const tbody = document.getElementById('tbody-archivos');
+            const noDataMsg = document.getElementById('no-data-msg');
+            
+            if (filtroActivo.desde) registros = registros.filter(r => r.fecha >= filtroActivo.desde);
+            if (filtroActivo.hasta) registros = registros.filter(r => r.fecha <= filtroActivo.hasta);
+            if (filtroActivo.doc) registros = registros.filter(r => (r.nro_doc || '').toLowerCase().includes(filtroActivo.doc.toLowerCase()));
+            if (filtroActivo.cliente) registros = registros.filter(r => r.cliente === filtroActivo.cliente);
+            if (filtroActivo.producto) registros = registros.filter(r => r.tipoCombustible === filtroActivo.producto);
+
+            tbody.innerHTML = '';
+
+            if (registros.length === 0) {
+                noDataMsg.style.display = 'block';
+                noDataMsg.innerText = "No hay datos con los filtros aplicados.";
+                document.getElementById('resumen-grid').innerHTML = '<p style="color:#666;">Sin datos.</p>';
+                return;
+            }
+            noDataMsg.style.display = 'none';
+
+            if (userRole === 'auditor') {
+                const resumen = {};
+                registros.forEach(r => {
+                    if (!resumen[r.nro_doc]) resumen[r.nro_doc] = { litros: 0, cliente: r.cliente, combustibles: {} };
+                    resumen[r.nro_doc].litros += r.litros;
+                    const comb = r.tipoCombustible || 'Sin especificar';
+                    if (!resumen[r.nro_doc].combustibles[comb]) resumen[r.nro_doc].combustibles[comb] = 0;
+                    resumen[r.nro_doc].combustibles[comb] += r.litros;
+                });
+
+                const resumenGrid = document.getElementById('resumen-grid');
+                resumenGrid.innerHTML = '';
+                for (const [nro_doc, data] of Object.entries(resumen)) {
+                    const div = document.createElement('div');
+                    div.className = 'resumen-item';
+                    let combustiblesHTML = '';
+                    for (const [comb, litros] of Object.entries(data.combustibles)) {
+                        const combClass = comb === 'DIESEL X10' ? 'diesel' : (comb === 'OBM' ? 'obm' : '');
+                        combustiblesHTML += `<span class="combustible ${combClass}">${comb}: ${litros.toLocaleString('es-AR')} L</span>`;
+                    }
+                    div.innerHTML = `<span class="doc">📄 Doc: ${nro_doc}</span><span class="cliente">🏢 ${data.cliente}</span><div class="litros">${data.litros.toLocaleString('es-AR')} L</div><div style="margin-top: 8px;">${combustiblesHTML}</div>`;
+                    resumenGrid.appendChild(div);
+                }
+            }
+
+            registros.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+            registros.forEach((reg) => {
+                const tr = document.createElement('tr');
+                const originalIndex = DB.registros.findIndex(r => r.fecha === reg.fecha && r.nro_doc === reg.nro_doc && r.archivo === reg.archivo);
+
+                const workflow = getWorkflow(reg.cliente);
+                const estadosPosibles = workflow.estados;
+                if (reg.estado && !estadosPosibles.includes(reg.estado)) estadosPosibles.push(reg.estado);
+
+                let selectOptions = '';
+                estadosPosibles.forEach(est => {
+                    const selected = reg.estado === est ? 'selected' : '';
+                    selectOptions += `<option value="${est}" ${selected}>${est}</option>`;
+                });
+
+                const estadoClass = getEstadoClass(reg.estado);
+                const selectHTML = `
+                    <div class="estado-container">
+                        <select class="select-estado-tabla ${estadoClass}" id="select-estado-${originalIndex}" onchange="marcarCambioPendiente(${originalIndex}, this.value, this)">
+                            ${selectOptions}
+                        </select>
+                        <button class="btn-guardar-estado" id="btn-guardar-${originalIndex}" onclick="guardarEstado(${originalIndex})" title="Guardar cambio de estado">
+                            <i class="fas fa-save"></i> Guardar
+                        </button>
+                    </div>
+                `;
+
+                let accionesHTML = `<button class="btn-action btn-preview" onclick="verVistaPrevia(${originalIndex})" title="Vista Previa"><i class="fas fa-eye"></i></button>`;
+                if (userRole === 'auditor' || userRole === 'administracion') {
+                    accionesHTML += `<button class="btn-action btn-download" onclick="descargarArchivo(${originalIndex})" title="Descargar"><i class="fas fa-download"></i></button>`;
+                }
+
+                const fechaInicioHTML = reg.fechaInicio ? `<span style="color:#0d47a1; font-weight:bold;">${formatearFecha(reg.fechaInicio)}</span>` : '<span style="color:#999;">-</span>';
+                const fechaFacturadoHTML = reg.fechaFacturado ? `<span style="color:#1b5e20; font-weight:bold;">${formatearFecha(reg.fechaFacturado)}</span>` : '<span style="color:#999; font-style:italic;">Sin facturar</span>';
+                const combClass = getCombustibleClass(reg.tipoCombustible);
+
+                tr.innerHTML = `
+                    <td>${formatearFecha(reg.fecha)}</td>
+                    <td class="fecha-cell fecha-inicio-cell">${fechaInicioHTML}</td>
+                    <td class="fecha-cell fecha-facturado-cell ${!reg.fechaFacturado ? 'vacia' : ''}">${fechaFacturadoHTML}</td>
+                    <td>${reg.nro_doc}</td>
+                    <td>${reg.cliente}</td>
+                    <td>${reg.punto_entrega}</td>
+                    <td><strong>${reg.litros.toLocaleString('es-AR')} L</strong></td>
+                    <td><span class="combustible-cell ${combClass}">${reg.tipoCombustible || '-'}</span></td>
+                    <td><strong>${reg.cargado_por}</strong></td>
+                    <td>${reg.archivo}</td>
+                    <td>${accionesHTML}</td>
+                    <td>${selectHTML}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function marcarCambioPendiente(index, nuevoEstado, selectElement) {
+            cambiosPendientes[index] = nuevoEstado;
+            const estadoClass = getEstadoClass(nuevoEstado);
+            selectElement.className = 'select-estado-tabla ' + estadoClass;
+            const btnGuardar = document.getElementById(`btn-guardar-${index}`);
+            if (btnGuardar) {
+                btnGuardar.classList.add('pendiente');
+                btnGuardar.innerHTML = '<i class="fas fa-save"></i> Guardar *';
+            }
+        }
+
+        async function guardarEstado(index) {
+            if (cambiosPendientes[index] === undefined) {
+                mostrarToast("No hay cambios pendientes para guardar.");
+                return;
+            }
+
+            const nuevoEstado = cambiosPendientes[index];
+            const registroActual = DB.registros[index];
+            
+            let fechaFacturado = null;
+            if (nuevoEstado.toLowerCase().includes("facturado") && (!registroActual.fechaFacturado || !registroActual.estado.toLowerCase().includes("facturado"))) {
+                fechaFacturado = getFechaHoy();
+            }
+            
+            registroActual.estado = nuevoEstado;
+            if (fechaFacturado) registroActual.fechaFacturado = fechaFacturado;
+            
+            await sincronizarNube(); 
+            delete cambiosPendientes[index];
+            
+            const btnGuardar = document.getElementById(`btn-guardar-${index}`);
+            if (btnGuardar) {
+                btnGuardar.classList.remove('pendiente');
+                btnGuardar.innerHTML = '<i class="fas fa-save"></i> Guardar';
+            }
+            
+            mostrarToast(`✅ Estado guardado en la nube: "${nuevoEstado}"`);
+            cargarTablaArchivos(currentUserRole);
+        }
+
+        function mostrarToast(mensaje, esError = false) {
+            const toast = document.getElementById('toast-guardado');
+            document.getElementById('toast-message').innerText = mensaje;
+            toast.style.display = 'flex';
+            if (esError) {
+                toast.classList.add('error');
+                toast.querySelector('i').className = 'fas fa-times-circle';
+            } else {
+                toast.classList.remove('error');
+                toast.querySelector('i').className = 'fas fa-check-circle';
+            }
+            setTimeout(() => { toast.style.display = 'none'; }, 4000);
+        }
+
+        function verVistaPrevia(index) {
+            const reg = DB.registros[index];
+            if (!reg) return;
+            const modal = document.getElementById('modal-preview');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            modalTitle.innerText = `Vista Previa: ${reg.archivo}`;
+            if (reg.fileData) {
+                if (reg.archivo.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/)) {
+                    modalBody.innerHTML = `<img src="${reg.fileData}" alt="Vista previa">`;
+                } else if (reg.archivo.toLowerCase().endsWith('.pdf')) {
+                    modalBody.innerHTML = `<iframe src="${reg.fileData}" width="100%" height="100%" style="border:none;"></iframe>`;
+                } else {
+                    modalBody.innerHTML = `<div style="text-align: center; color: #555;"><i class="fas fa-file-alt" style="font-size: 5rem; color: var(--sinercorp-purple);"></i><h2>${reg.archivo}</h2><p>Vista previa no disponible.</p></div>`;
+                }
+            }
+            modal.style.display = 'flex';
+        }
+
+        function cerrarModal() { document.getElementById('modal-preview').style.display = 'none'; }
+
+        function descargarArchivo(index) {
+            const reg = DB.registros[index];
+            if (!reg || !reg.fileData) return alert("No se pudo descargar el archivo.");
+            const link = document.createElement('a');
+            link.href = reg.fileData;
+            link.download = reg.archivo;
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+
+        function exportarExcel() {
+            let registros = [...DB.registros];
+            if (filtroActivo.desde) registros = registros.filter(r => r.fecha >= filtroActivo.desde);
+            if (filtroActivo.hasta) registros = registros.filter(r => r.fecha <= filtroActivo.hasta);
+            if (filtroActivo.doc) registros = registros.filter(r => (r.nro_doc || '').toLowerCase().includes(filtroActivo.doc.toLowerCase()));
+            if (filtroActivo.cliente) registros = registros.filter(r => r.cliente === filtroActivo.cliente);
+            if (filtroActivo.producto) registros = registros.filter(r => r.tipoCombustible === filtroActivo.producto);
+
+            if (registros.length === 0) return alert("No hay registros para exportar.");
+            registros.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+            let html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><style>table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 12px; } th { background-color: #021241; color: white; font-weight: bold; border: 1px solid #ccc; padding: 8px; text-align: left; } td { border: 1px solid #ccc; padding: 6px; } .text-format { mso-number-format:"\\@"; }</style></head><body><table><thead><tr><th>Fecha</th><th>Fecha Inicio</th><th>Fecha Facturado</th><th>Nro_doc</th><th>Cliente</th><th>Punto_entrega</th><th>Litros</th><th>Combustible</th><th>Cargado por</th><th>Archivo</th><th>Estado</th></tr></thead><tbody>';
+
+            registros.forEach(r => {
+                html += `<tr><td>${formatearFecha(r.fecha)}</td><td>${r.fechaInicio ? formatearFecha(r.fechaInicio) : '-'}</td><td>${r.fechaFacturado ? formatearFecha(r.fechaFacturado) : 'Sin facturar'}</td><td class="text-format">${r.nro_doc}</td><td>${r.cliente}</td><td>${r.punto_entrega}</td><td>${r.litros}</td><td>${r.tipoCombustible || '-'}</td><td>${r.cargado_por}</td><td>${r.archivo}</td><td>${r.estado}</td></tr>`;
+            });
+
+            html += '</tbody></table></body></html>';
+            const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url; link.download = `Reporte_SINERCOM_${getFechaHoy()}.xls`;
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            mostrarToast(`✅ Reporte Excel exportado`);
+        }
+
+        function exportarTXT() {
+            let registros = [...DB.registros];
+            if (filtroActivo.desde) registros = registros.filter(r => r.fecha >= filtroActivo.desde);
+            if (filtroActivo.hasta) registros = registros.filter(r => r.fecha <= filtroActivo.hasta);
+            if (filtroActivo.doc) registros = registros.filter(r => (r.nro_doc || '').toLowerCase().includes(filtroActivo.doc.toLowerCase()));
+            if (filtroActivo.cliente) registros = registros.filter(r => r.cliente === filtroActivo.cliente);
+            if (filtroActivo.producto) registros = registros.filter(r => r.tipoCombustible === filtroActivo.producto);
+
+            if (registros.length === 0) return alert("No hay registros para exportar.");
+            registros.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+            let contenido = "=".repeat(110) + "\n                    REPORTE DE CARÁTULAS - SINERCOM\n" + "=".repeat(110) + "\n";
+            contenido += `Fecha de exportación: ${new Date().toLocaleString('es-AR')}\nExportado por: ${currentUserName}\nTotal de registros: ${registros.length}\n`;
+            const totalLitros = registros.reduce((sum, r) => sum + (r.litros || 0), 0);
+            contenido += `Total de litros: ${totalLitros.toLocaleString('es-AR')} L\n` + "=".repeat(110) + "\n\n";
+            contenido += "--- DETALLE DE REGISTROS ---\n\n";
+            registros.forEach((r, i) => {
+                contenido += `[${i + 1}] ------------------------------\n  Fecha:              ${formatearFecha(r.fecha)}\n  Fecha de Inicio:    ${r.fechaInicio ? formatearFecha(r.fechaInicio) : '-'}\n  Fecha de Facturado: ${r.fechaFacturado ? formatearFecha(r.fechaFacturado) : '-'}\n  Nro_doc:            ${r.nro_doc}\n  Cliente:            ${r.cliente}\n  Punto_entrega:      ${r.punto_entrega}\n  Tipo Combustible:   ${r.tipoCombustible || '-'}\n  Litros:             ${(r.litros || 0).toLocaleString('es-AR')} L\n  Estado:             ${r.estado}\n  Cargado por:        ${r.cargado_por}\n  Archivo:            ${r.archivo}\n\n`;
+            });
+            contenido += "=".repeat(110) + "\n                    FIN DEL REPORTE\n" + "=".repeat(110) + "\n";
+
+            const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url; link.download = `Reporte_SINERCOM_${getFechaHoy()}.txt`;
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            mostrarToast(`✅ Reporte TXT exportado`);
+        }
+
+        function cargarSelectClientes() {
+            const select = document.getElementById('cliente-select');
+            select.innerHTML = '<option value="">-- Seleccione un cliente --</option>';
+            const clientesUnicos = [];
+            const vistos = new Set();
+            DB.clientes.forEach(c => {
+                const key = c.nombre + '|' + (c.locacion || '');
+                if (!vistos.has(key)) { vistos.add(key); clientesUnicos.push(c); }
+            });
+            clientesUnicos.sort((a, b) => a.nombre.localeCompare(b.nombre)).forEach(c => {
+                const option = document.createElement('option');
+                option.value = c.nombre + (c.locacion ? ' - ' + c.locacion : '');
+                option.text = c.nombre + (c.locacion ? ' - ' + c.locacion : '');
+                option.dataset.locacion = c.locacion || '';
+                option.dataset.nombre = c.nombre;
+                select.appendChild(option);
+            });
+        }
+
+        document.getElementById('cliente-select').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const locacion = selectedOption.dataset.locacion;
+            const nombreCliente = selectedOption.dataset.nombre;
+            if (locacion && locacion.trim() !== '') document.getElementById('punto_entrega').value = locacion;
+
+            if (nombreCliente) {
+                const workflow = getWorkflow(nombreCliente);
+                const estadoSelect = document.getElementById('estado');
+                estadoSelect.innerHTML = '';
+                workflow.estados.forEach(est => {
+                    const option = document.createElement('option');
+                    option.value = est; option.text = est; estadoSelect.appendChild(option);
+                });
+                const docsDiv = document.getElementById('docs-requeridos');
+                const listaDocs = document.getElementById('lista-docs');
+                if (workflow.docs && workflow.docs.length > 0) {
+                    listaDocs.innerHTML = '';
+                    workflow.docs.forEach(doc => { const li = document.createElement('li'); li.innerText = doc; listaDocs.appendChild(li); });
+                    docsDiv.classList.add('visible');
+                } else { docsDiv.classList.remove('visible'); }
+            } else {
+                document.getElementById('estado').innerHTML = '<option value="">-- Seleccione un estado --</option>';
+                document.getElementById('docs-requeridos').classList.remove('visible');
+            }
+        });
+
+        function cargarTablaClientes() {
+            const tbody = document.getElementById('tbody-clientes');
+            const noDataMsg = document.getElementById('no-data-clientes-msg');
+            tbody.innerHTML = '';
+            if (DB.clientes.length === 0) { noDataMsg.style.display = 'block'; return; }
+            noDataMsg.style.display = 'none';
+            DB.clientes.sort((a, b) => a.nombre.localeCompare(b.nombre)).forEach((c) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${c.nombre || '-'}</strong></td>
+                    <td>${c.locacion || '-'}</td>
+                    <td>${c.observaciones || '-'}</td>
+                    <td>
+                        <button class="btn-action btn-edit" onclick="editarCliente(${c.id})" title="Editar"><i class="fas fa-edit"></i></button>
+                        <button class="btn-action btn-delete" onclick="confirmarEliminarCliente(${c.id})" title="Eliminar"><i class="fas fa-trash"></i></button>
+                    </td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('cliente-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const editId = document.getElementById('cliente-edit-id').value;
+            const clienteData = {
+                nombre: document.getElementById('cliente-nombre').value.trim(),
+                locacion: document.getElementById('cliente-locacion').value.trim(),
+                observaciones: document.getElementById('cliente-observaciones').value.trim()
+            };
+
+            if (editId) {
+                const index = DB.clientes.findIndex(c => c.id === parseInt(editId));
+                if (index !== -1) DB.clientes[index] = { ...DB.clientes[index], ...clienteData };
+                mostrarToast(`✅ Cliente actualizado`);
+            } else {
+                clienteData.id = Date.now();
+                DB.clientes.push(clienteData);
+                mostrarToast(`✅ Cliente agregado`);
+            }
+            await sincronizarNube(); 
+
+            this.reset();
+            document.getElementById('cliente-edit-id').value = '';
+            document.getElementById('cliente-form-title').innerText = "➕ Agregar Nuevo Cliente";
+            document.getElementById('btn-cliente-text').innerText = "Guardar Cliente";
+            document.getElementById('btn-cancelar-cliente').style.display = 'none';
+            cargarTablaClientes();
+            cargarSelectClientes();
+        });
+
+        function editarCliente(id) {
+            const cliente = DB.clientes.find(c => c.id === id);
+            if (!cliente) return;
+            document.getElementById('cliente-edit-id').value = cliente.id;
+            document.getElementById('cliente-nombre').value = cliente.nombre || '';
+            document.getElementById('cliente-locacion').value = cliente.locacion || '';
+            document.getElementById('cliente-observaciones').value = cliente.observaciones || '';
+            document.getElementById('cliente-form-title').innerText = "✏️ Editando Cliente";
+            document.getElementById('btn-cliente-text').innerText = "Actualizar Cliente";
+            document.getElementById('btn-cancelar-cliente').style.display = 'block';
+            document.getElementById('cliente-form').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelarEdicionCliente() {
+            document.getElementById('cliente-form').reset();
+            document.getElementById('cliente-edit-id').value = '';
+            document.getElementById('cliente-form-title').innerText = "➕ Agregar Nuevo Cliente";
+            document.getElementById('btn-cliente-text').innerText = "Guardar Cliente";
+            document.getElementById('btn-cancelar-cliente').style.display = 'none';
+        }
+
+        async function confirmarEliminarCliente(id) {
+            const cliente = DB.clientes.find(c => c.id === id);
+            if (!cliente) return;
+            if (confirm(`¿Estás seguro de eliminar al cliente "${cliente.nombre}"?`)) {
+                DB.clientes = DB.clientes.filter(c => c.id !== id);
+                await sincronizarNube(); 
+                mostrarToast(`🗑️ Cliente eliminado`);
+                cargarTablaClientes();
+                cargarSelectClientes();
+                cargarFiltroClientes();
+            }
+        }
+
+        async function restaurarClientesDefault() {
+            if (confirm('¿Estás seguro de restaurar los clientes por defecto?\n\nEsto BORRARÁ cualquier cliente agregado.')) {
+                DB.clientes = CLIENTES_INICIALES.map((c, i) => ({
+                    id: Date.now() + i,
+                    nombre: c.nombre,
+                    locacion: c.locacion || "",
+                    observaciones: c.observaciones || ""
+                }));
+                await sincronizarNube(); 
+                cargarTablaClientes();
+                cargarSelectClientes();
+                cargarFiltroClientes();
+                mostrarToast(`✅ Clientes restaurados por defecto`);
+            }
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('modal-preview');
+            if (event.target == modal) cerrarModal();
+        }
+    </script>
+</body>
+</html>
